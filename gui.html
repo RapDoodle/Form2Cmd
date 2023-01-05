@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading...</title>
+</head>
+
+<body>
+  <div class="main-block">
+    <form id="main-form" action="/">
+      <div class="main-form-title">
+        <h1 id="gui-title"></h1>
+      </div>
+      <div class="main-form-block">
+      </div>
+      <button id="submitBtn" type="submit">Submit</button>
+      <input id="cmdField" type="hidden" style="width:100%;padding:10px 0;margin: 5px auto;" readonly rows="5"></input>
+    </form>
+  </div>
+
+  <script src="gui.manifest.js"></script>
+
+  <script>
+    // Priority list
+    const priority = new Array()
+    priority.length = 256;  // Priority ranges from 0 to 255
+
+    // Configure title
+    document.title = (blueprint && blueprint.meta && blueprint.meta.title) ? blueprint.meta.title : "Untitled GUI"
+    document.querySelector('#gui-title').innerText = document.title
+
+    const parseSpace = (str) => {
+      return /\s/.test(str) ? "\"" + str + "\"" : str
+    }
+
+    const parseCmd = () => {
+      let command = blueprint.command.prefix
+      priority.forEach((ele, pri) => {
+        if (ele) {
+          ele.forEach((e) => {
+            if (e.type === 'radio') {
+              e.elements.forEach((i) => {
+                if (i.checked) {
+                  command += " " +e.command.arg + blueprint.command.separator + parseSpace(i.value)
+                }
+              })
+            } else {
+              if (e.command.type.toLowerCase() == 'str') {
+                if (e.element.value.length > 0) {
+                  command += " " + e.command.arg + blueprint.command.separator + parseSpace(e.element.value)
+                }
+              } else if (e.command.type.toLowerCase() == 'flag') {
+                if (e.element.checked) {
+                  command += " " + e.command.arg
+                }
+              }
+            }
+          })
+        }
+      })
+      
+      cmdField.setAttribute('type', 'textarea')
+      cmdField.value = command
+    }
+
+    const cmdField = document.querySelector('#cmdField')
+    document.querySelector('#submitBtn').addEventListener("click", (event) => {
+      if (!document.querySelector('#main-form').checkValidity()) {
+        document.querySelector('#main-form').reportValidity();
+      } else {
+        event.preventDefault()
+        parseCmd()
+      }
+    })
+
+    // Output command field: Select all on click
+    cmdField.addEventListener('click', (event) => {
+      event.target.focus()
+      event.target.select()
+    })
+
+    const createFormElements = (base, formBlueprint) => {
+      let levelBase = base
+      for (let i = 0; i < formBlueprint.length; i++) {
+        const currFormBp = formBlueprint[i]
+        if (currFormBp['type'].toLowerCase().startsWith("fieldset")) {
+          const fieldset = document.createElement('fieldset')
+          base.appendChild(fieldset)
+          levelBase = fieldset
+
+          const legend = document.createElement('legend')
+          const h3 = document.createElement('h3')
+          h3.innerText = (currFormBp && currFormBp.title) ? currFormBp.title : ""
+          legend.appendChild(h3)
+          const fieldsetBlock = document.createElement('div')
+          fieldsetBlock.classList = [currFormBp.type + '-block']
+          levelBase.appendChild(legend)
+          levelBase.appendChild(fieldsetBlock)
+          // Recursively create form items
+          createFormElements(fieldsetBlock, currFormBp.form)
+        } else if (currFormBp.type === 'checkbox' || currFormBp.type === 'checbox-left') {
+          const div = document.createElement('div')
+          div.classList = ['checkbox']
+          const input = document.createElement('input')
+          input.setAttribute('type', 'checkbox')
+          const span = document.createElement('span')
+          span.innerText = currFormBp.label
+          div.appendChild(input)
+          div.appendChild(span)
+          currFormBp.element = input
+          levelBase.appendChild(div)
+
+          if (currFormBp.checked) {
+            input.setAttribute('checked', '')
+          }
+
+          // Required
+          if (currFormBp.required) {
+            input.setAttribute('required', '')
+          }
+
+          // Use a default order of 255
+          if (!currFormBp.command.order) {
+            currFormBp.command.order = 255
+          }
+
+          // Create an array if the given position is null
+          if (!priority[currFormBp.command.order]) {
+            priority[currFormBp.command.order] = new Array()
+          }
+
+          // Push the current blueprint to the array in the specified order
+          priority[currFormBp.command.order].push(currFormBp)
+        } else {
+          const div = document.createElement('div')
+          const label = document.createElement('label')
+          label.innerText = currFormBp.label ? currFormBp.label : ""
+          div.appendChild(label)
+          if (currFormBp.type === 'radio') {
+            const radioButtonsDiv = document.createElement('div')
+            radioButtonsDiv.classList = ['radioButtons']
+
+            const inputs = new Array()
+
+            const generateRadios = (value, text) => {
+              // Create the radio button
+              const currInput = document.createElement('input')
+              currInput.setAttribute('type', 'radio')
+              currInput.setAttribute('value', value)
+              currInput.setAttribute('name', label.innerText)
+              if (currFormBp.required) {
+                currInput.setAttribute('required', '')
+              }
+
+              // Handle default values
+              if (currFormBp.default === value) {
+                currInput.setAttribute('checked', '')
+              }
+
+              // Create the label
+              const currLabel = document.createElement('label')
+              currLabel.classList = ['radio']
+              currLabel.setAttribute('for', value)
+              currLabel.innerText = text
+
+              inputs.push(currInput)
+              radioButtonsDiv.appendChild(currInput)
+              radioButtonsDiv.appendChild(currLabel)
+            }
+
+            if (Array.isArray(currFormBp.options)) {
+              // An array
+              currFormBp.options.forEach((text) => {
+                generateRadios(text, text)
+              })
+            } else {
+              // A normal object with value->text pair
+              Object.entries(currFormBp.options).forEach((obj) => {
+                generateRadios(obj[0], obj[1])
+              })
+            }
+
+            div.appendChild(radioButtonsDiv)
+            currFormBp.elements = inputs
+          } else {
+            let input = null
+            if (currFormBp.type === 'select') {
+              // Special routine for select
+              input = document.createElement('select')
+              if (!currFormBp.default) {
+                const emptyOpt = document.createElement('option')
+                input.appendChild(emptyOpt)
+              }
+
+              const generateOptions = (value, name) => {
+                const currOpt = document.createElement('option')
+                currOpt.setAttribute('value', value)
+                currOpt.innerText = name
+                if (currFormBp.default && value == currFormBp.default) {
+                  currOpt.setAttribute('selected', 'selected')
+                }
+                input.appendChild(currOpt)
+              }
+
+              if (Array.isArray(currFormBp.options)) {
+                // An array
+                currFormBp.options.forEach((text) => {
+                  generateOptions(text, text)
+                })
+              } else {
+                // A normal object with value->text pair
+                Object.entries(currFormBp.options).forEach((obj) => {
+                  generateOptions(obj[0], obj[1])
+                })
+              }
+              
+              input.setAttribute('type', currFormBp['type'])
+            } else if (currFormBp.type === 'checkbox-right') {
+              // Special routine for checkboxs displayed to the right of label
+              input = document.createElement('input')
+              input.setAttribute('type', 'checkbox')
+
+              if (currFormBp.checked) {
+                input.setAttribute('checked', '')
+              }
+            } else {
+              // Default routines
+              input = document.createElement('input')
+              input.setAttribute('type', currFormBp['type'])
+            }
+
+            // Process placeholder
+            if (currFormBp.placeholder) {
+              input.setAttribute('placeholder', currFormBp.placeholder)
+            }
+            // Process the required attribute
+            if (currFormBp.required) {
+              input.setAttribute('required', '')
+            }
+            // Process the help message (display upon hover)
+            if (currFormBp.help) {
+              label.setAttribute('title', currFormBp.help)
+            }
+            // Process default values
+            if (currFormBp.default) {
+              input.setAttribute('value', currFormBp.default)
+            }
+            
+            div.appendChild(input)
+
+            currFormBp.element = input
+          }
+
+          levelBase.appendChild(div)
+          
+          // Use a default order of 255
+          if (!currFormBp.command.order) {
+            currFormBp.command.order = 255
+          }
+
+          // Create an array if the given position is null
+          if (!priority[currFormBp.command.order]) {
+            priority[currFormBp.command.order] = new Array()
+          }
+
+          // Push the current blueprint to the array in the specified order
+          priority[currFormBp.command.order].push(currFormBp)
+        }
+      }
+    }
+
+    // console.log(initData)
+    // const el = document.createElement('div')
+    const formBase = document.querySelector('#main-form>.main-form-block')
+    const formBlueprintBase = blueprint.form
+    createFormElements(formBase, formBlueprintBase)
+
+  </script>
+
+  <style>
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body,
+    div,
+    form,
+    input,
+    select,
+    p {
+      padding: 0;
+      margin: 0;
+      outline: none;
+      font-family: Roboto, Arial, sans-serif;
+      font-size: 14px;
+      color: #666;
+    }
+
+    h1 {
+      margin: 0;
+      font-weight: 400;
+      color: #007bff;
+    }
+
+    h3 {
+      margin: 12px 0;
+      color: #007bff;
+    }
+
+    .main-form-title {
+      padding: 0 0 0 10px;
+    }
+
+    .main-block {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
+    }
+
+    #main-form {
+      width: 100%;
+      padding: 20px;
+    }
+
+    fieldset {
+      border: none;
+      border-top: 1px solid #007bff;
+    }
+
+    .fieldset-block {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .fieldset-block>div {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .fieldset-block>div,
+    input,
+    label {
+      width: 100%;
+    }
+
+    label {
+      padding: 0 5px;
+      text-align: right;
+      vertical-align: middle;
+    }
+
+    input {
+      padding: 5px;
+      vertical-align: middle;
+    }
+
+    .checkbox {
+      margin-bottom: 10px;
+    }
+
+    select,
+    .radioButtons {
+      width: calc(100% + 26px);
+      padding: 5px 0;
+    }
+
+    select {
+      background: transparent;
+    }
+
+    input[type="radio"] {
+      width: auto;
+    }
+
+    .radioButtons[type="radio"] {
+      padding: 0 5px 0 0;
+    }
+
+    .birthdate select.day {
+      width: 35px;
+    }
+
+    .birthdate select.mounth {
+      width: calc(100% - 94px);
+    }
+
+    .birthdate input {
+      width: 38px;
+      vertical-align: unset;
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+      margin: -2px 10px 0 0;
+    }
+
+    .checkbox a {
+      color: #007bff;
+    }
+
+    .checkbox a:hover {
+      color: #0069CF;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 0;
+      margin: 10px auto;
+      border-radius: 5px;
+      border: none;
+      background: #007bff;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    button:hover {
+      background: #0069CF;
+    }
+
+    @media (min-width: 568px) {
+
+      .fieldset-block>div {
+        width: 50%;
+      }
+
+      label {
+        width: 40%;
+      }
+
+      input {
+        width: 60%;
+      }
+
+      select,
+      .radioButtons {
+        width: calc(60% + 16px);
+      }
+    }
+  </style>
+</body>
+
+</html>
