@@ -94,19 +94,19 @@
      * 
      * @param {object}: Form item's blueprint
      */
-    const registerBlueprint = (currFormBp) => {
+    const registerBlueprint = (currItemBp) => {
       // Use a default order of 255
-      if (!currFormBp.command.order) {
-        currFormBp.command.order = 255
+      if (!currItemBp.command.order) {
+        currItemBp.command.order = 255
       }
 
       // Create an array if the given position is null
-      if (!priorityArr[currFormBp.command.order]) {
-        priorityArr[currFormBp.command.order] = new Array()
+      if (!priorityArr[currItemBp.command.order]) {
+        priorityArr[currItemBp.command.order] = new Array()
       }
 
       // Push the current blueprint to the array in the specified order
-      priorityArr[currFormBp.command.order].push(currFormBp)
+      priorityArr[currItemBp.command.order].push(currItemBp)
     }
 
     /**
@@ -119,8 +119,8 @@
      */
     const createFormElements = (base, formBlueprint) => {
       for (let i = 0; i < formBlueprint.length; i++) {
-        const currFormBp = formBlueprint[i]
-        if (currFormBp['type'].toLowerCase().startsWith("fieldset")) {
+        const currItemBp = formBlueprint[i]
+        if (currItemBp.type.toLowerCase().startsWith("fieldset")) {
           // Fieldset block, recursively generate form items
           const fieldset = document.createElement('fieldset')
           base.appendChild(fieldset)
@@ -128,42 +128,42 @@
           // Create legends
           const legend = document.createElement('legend')
           const h3 = document.createElement('h3')
-          h3.innerText = (currFormBp && currFormBp.title) ? currFormBp.title : ""
+          h3.innerText = (currItemBp && currItemBp.title) ? currItemBp.title : ""
           legend.appendChild(h3)
           fieldset.appendChild(legend)
 
           // Form item container
           const fieldsetBlock = document.createElement('div')
-          fieldsetBlock.classList = [currFormBp.type + '-block']
+          fieldsetBlock.classList = [currItemBp.type + '-block']
           fieldset.appendChild(fieldsetBlock)
 
           // Recursively generate form items
-          createFormElements(fieldsetBlock, currFormBp.form)
+          createFormElements(fieldsetBlock, currItemBp.form)
 
-        } else if (currFormBp.type === 'checkbox' || currFormBp.type === 'checbox-left') {
+        } else if (currItemBp.type === 'checkbox' || currItemBp.type === 'checbox-left') {
           // Default checkboxes: checkbox positioned left to the label
           const div = document.createElement('div')
           div.classList = ['checkbox']
           const input = document.createElement('input')
           input.setAttribute('type', 'checkbox')
           const span = document.createElement('span')
-          span.innerText = currFormBp.label
+          span.innerText = currItemBp.label
           div.appendChild(input)
           div.appendChild(span)
-          currFormBp.element = input
+          currItemBp.element = input
           base.appendChild(div)
 
-          if (currFormBp.checked) {
+          if (currItemBp.checked) {
             input.setAttribute('checked', '')
           }
 
           // Required
-          if (currFormBp.required) {
+          if (currItemBp.required) {
             input.setAttribute('required', '')
           }
 
           // Register elements with priority array
-          registerBlueprint(currFormBp)
+          registerBlueprint(currItemBp)
 
         } else {
           // Form items with input positioned right to the label
@@ -171,10 +171,10 @@
 
           // Create labels
           const label = document.createElement('label')
-          label.innerText = currFormBp.label ? currFormBp.label : ""
+          label.innerText = currItemBp.label ? currItemBp.label : ""
           div.appendChild(label)
 
-          if (currFormBp.type === 'radio') {
+          if (currItemBp.type === 'radio') {
             // Form items that need multiple input elements
             // A group of radio buttons
             const radioButtonsDiv = document.createElement('div')
@@ -189,12 +189,12 @@
               currInput.setAttribute('name', label.innerText)
 
               // Handle required attribute
-              if (currFormBp.required) {
+              if (currItemBp.required) {
                 currInput.setAttribute('required', '')
               }
 
               // Handle default values
-              if (currFormBp.default === value) {
+              if (currItemBp.default === value) {
                 currInput.setAttribute('checked', '')
               }
 
@@ -209,28 +209,26 @@
               radioButtonsDiv.appendChild(currLabel)
             }
 
-            if (Array.isArray(currFormBp.options)) {
-              // An array, use the same text for value and text description
-              currFormBp.options.forEach((text) => {
-                generateRadios(text, text)
-              })
-            } else {
-              // A normal object with value->text pair
-              Object.entries(currFormBp.options).forEach((obj) => {
-                generateRadios(obj[0], obj[1])
-              })
-            }
+            currItemBp.options.forEach((obj) => {
+              if (typeof(obj) === 'string') {
+                // An array, use the same text for value and text description
+                generateRadios(obj, obj)
+              } else {
+                // An object with value->text pair
+                generateRadios(obj.value, obj.text)
+              }
+            })
 
             div.appendChild(radioButtonsDiv)
-            currFormBp.elements = inputs
+            currItemBp.elements = inputs
 
           } else {
             // Form items that only need one input element
             let input = null
-            if (currFormBp.type === 'select') {
+            if (currItemBp.type === 'select') {
               // Special routine for select
               input = document.createElement('select')
-              if (!currFormBp.default) {
+              if (!currItemBp.default) {
                 const emptyOpt = document.createElement('option')
                 input.appendChild(emptyOpt)
               }
@@ -241,69 +239,67 @@
                 currOpt.innerText = name
 
                 // Handle selected option
-                if (currFormBp.default && value == currFormBp.default) {
+                if (currItemBp.default && value == currItemBp.default) {
                   currOpt.setAttribute('selected', 'selected')
                 }
 
                 input.appendChild(currOpt)
               }
 
-              if (Array.isArray(currFormBp.options)) {
-                // An array, use the same text for value and text description
-                currFormBp.options.forEach((text) => {
-                  generateOptions(text, text)
-                })
-              } else {
-                // A normal object with value->text pair
-                Object.entries(currFormBp.options).forEach((obj) => {
-                  generateOptions(obj[0], obj[1])
-                })
-              }
+              currItemBp.options.forEach((obj) => {
+                if (typeof(obj) === 'string') {
+                  // An array, use the same text for value and text description
+                  generateOptions(obj, obj)
+                } else {
+                  // An object with value->text pair
+                  generateOptions(obj.value, obj.text)
+                }
+              })
 
-              input.setAttribute('type', currFormBp.type)
+              input.setAttribute('type', currItemBp.type)
 
-            } else if (currFormBp.type === 'checkbox-right') {
+            } else if (currItemBp.type === 'checkbox-right') {
               // Special routine for checkboxes displayed to the right of label
               input = document.createElement('input')
               input.setAttribute('type', 'checkbox')
 
-              if (currFormBp.checked) {
+              if (currItemBp.checked) {
                 input.setAttribute('checked', '')
               }
             } else {
               // Other input types
               input = document.createElement('input')
-              input.setAttribute('type', currFormBp.type)
+              input.setAttribute('type', currItemBp.type)
             }
 
             // Process placeholder
-            if (currFormBp.placeholder) {
-              input.setAttribute('placeholder', currFormBp.placeholder)
+            if (currItemBp.placeholder) {
+              input.setAttribute('placeholder', currItemBp.placeholder)
             }
 
             // Process the required attribute
-            if (currFormBp.required) {
+            if (currItemBp.required) {
               input.setAttribute('required', '')
             }
 
             // Process the help message (display upon hover)
-            if (currFormBp.help) {
-              label.setAttribute('title', currFormBp.help)
+            if (currItemBp.help) {
+              label.setAttribute('title', currItemBp.help)
             }
 
             // Process default values
-            if (currFormBp.default) {
-              input.setAttribute('value', currFormBp.default)
+            if (currItemBp.default) {
+              input.setAttribute('value', currItemBp.default)
             }
 
             div.appendChild(input)
-            currFormBp.element = input
+            currItemBp.element = input
           }
 
           base.appendChild(div)
           
           // Register elements with priority array
-          registerBlueprint(currFormBp)
+          registerBlueprint(currItemBp)
         }
       }
     }

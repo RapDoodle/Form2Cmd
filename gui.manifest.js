@@ -168,13 +168,28 @@ const blueprint = {
           type: "select",
           label: "Select with different value/text pair",
           help: "Some help message",
-          options: {
-            "opt_1": "Option 1",
-            "opt_2": "Option 2",
-            "opt_3": "Option 3",
-            "opt_4": "Option 4",
-            "opt_5": "Option 5"
-          },
+          options: [
+            {
+              value: "opt_1",
+              text: "Option 1"
+            },
+            {
+              value: "opt_2",
+              text: "Option 2"
+            },
+            {
+              value: "opt_3",
+              text: "Option 3"
+            },
+            {
+              value: "opt_4",
+              text: "Option 4"
+            },
+            {
+              value: "opt_5",
+              text: "Option 5"
+            }
+          ],
           default: "opt_3",
           command: {
             order: 10,
@@ -228,11 +243,20 @@ const blueprint = {
           label: "Radio field with different value/text pair",
           help: "Choose an option",
           required: true,
-          options: {
-            "opt_1": "Option 1",
-            "opt_2": "Option 2",
-            "opt_3": "Option 3"
-          },
+          options: [
+            {
+              value: "opt_1",
+              text: "Option 1"
+            },
+            {
+              value: "opt_2",
+              text: "Option 2"
+            },
+            {
+              value: "opt_3",
+              text: "Option 3"
+            }
+          ],
           default: "opt_3",
           command: {
             order: 15,
