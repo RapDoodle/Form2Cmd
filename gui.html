@@ -59,9 +59,18 @@
           bpArr.forEach((bp) => {
             if (bp.type === 'radio') {
               // Iterate through all radio buttons
-              bp.elements.forEach((i) => {
-                if (i.checked) {
-                  command += " " + bp.command.arg + blueprint.command.separator + parseValue(i.value)
+              bp.elements.forEach((inp, idx) => {
+                if (inp.checked) {
+                  // If ignoreOnDisabled is true and the element is disabled, ignore the element
+                  if (bp.command && bp.command.ignoreOnDisabled && inp.disabled) {
+                    return
+                  }
+
+                  if (bp.command.type.toLowerCase() === 'str') {
+                    command += " " + bp.command.arg + blueprint.command.separator + parseValue(inp.value)
+                  } else if (bp.command.type.toLowerCase() === 'flag') {
+                    command += " " + bp.command.args[idx]
+                  }
                 }
               })
             } else {

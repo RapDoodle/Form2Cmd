@@ -291,6 +291,47 @@ const blueprint = {
             arg: "--radio3",
           },
         },
+        {
+          type: "radio",
+          label: "Radio field (flags)",
+          help: "Choose an option",
+          required: true,
+          options: ["Option 1", "Option 2", "Option 3"],
+          command: {
+            order: 15,
+            type: "flag",
+            args: ["--flag-opt-1", "--flag-opt-2", "--flag-opt-3"]
+          },
+        },
+        {
+          type: "radio",
+          label: "Disabled radios",
+          help: "Choose an option",
+          required: true,
+          options: ["Option 1", "Option 2", "Option 3"],
+          disabled: true,
+          default: "Option 2",
+          command: {
+            order: 15,
+            type: "flag",
+            args: ["--d-opt-1", "--d-opt-2", "--d-opt-3"]
+          },
+        },
+        {
+          type: "radio",
+          label: "Disabled radios (ignored)",
+          help: "Choose an option",
+          required: true,
+          options: ["Option 1", "Option 2", "Option 3"],
+          disabled: true,
+          default: "Option 2",
+          command: {
+            ignoreOnDisabled: true,
+            order: 15,
+            type: "flag",
+            args: ["--invalid-opt-1", "--invalid-opt-2", "--invalid-opt-3"]
+          },
+        },
       ],
     },
     {
