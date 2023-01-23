@@ -29,7 +29,7 @@
      * Process values. It does the following things:
      *  1. Escape backslashes (\)
      *  2. Escape any double quotes.
-     *  3. If the value contains spaces, append double quotes.
+     *  3. If the value contains spaces, insert double quotes.
      * 
      * @param {string} Argument value
      * 
@@ -65,6 +65,11 @@
                 }
               })
             } else {
+              // If ignoreOnDisabled is true and the element is disabled, ignore the element
+              if (bp.command && bp.command.ignoreOnDisabled && bp.element.disabled) {
+                return
+              }
+              
               if (bp.command.type.toLowerCase() === 'str') {
                 // Input with value attributes
                 if (bp.element.value.length > 0) {
@@ -85,12 +90,13 @@
       const cmdField = document.querySelector('#cmdField')
       cmdField.setAttribute('type', 'textarea')
       cmdField.value = command
-      
+
       return command
     }
 
     /**
-     * Register blueprint with priority array
+     * Register blueprint with the priority array. Radix sort is
+     * implemented to sort arguments with different priorities.
      * 
      * @param {object}: Form item's blueprint
      */
@@ -107,6 +113,34 @@
 
       // Push the current blueprint to the array in the specified order
       priorityArr[currItemBp.command.order].push(currItemBp)
+    }
+
+    /**
+     * Set input attributes.
+     * 
+     * @param {object} The input element.
+     * @param {object} The attributes (blueprint).
+     */
+    const setInputAttributes = (input, attributes) => {
+      // Placeholder attribute
+      if (attributes.placeholder) {
+        input.setAttribute('placeholder', attributes.placeholder)
+      }
+
+      // Required attribute
+      if (attributes.required) {
+        input.setAttribute('required', '')
+      }
+
+      // Checked attribute. Only for radio
+      if (attributes.checked) {
+        input.setAttribute('checked', '')
+      }
+
+      // Disabled attribute
+      if (attributes.disabled) {
+        input.setAttribute('disabled', '')
+      }
     }
 
     /**
@@ -153,14 +187,8 @@
           currItemBp.element = input
           base.appendChild(div)
 
-          if (currItemBp.checked) {
-            input.setAttribute('checked', '')
-          }
-
-          // Required
-          if (currItemBp.required) {
-            input.setAttribute('required', '')
-          }
+          // Set input's attributes
+          setInputAttributes(input, currItemBp)
 
           // Register elements with priority array
           registerBlueprint(currItemBp)
@@ -188,10 +216,8 @@
               currInput.setAttribute('value', value)
               currInput.setAttribute('name', label.innerText)
 
-              // Handle required attribute
-              if (currItemBp.required) {
-                currInput.setAttribute('required', '')
-              }
+              // Set input's attributes
+              setInputAttributes(currInput, currItemBp)
 
               // Handle default values
               if (currItemBp.default === value) {
@@ -263,24 +289,16 @@
               input = document.createElement('input')
               input.setAttribute('type', 'checkbox')
 
-              if (currItemBp.checked) {
-                input.setAttribute('checked', '')
-              }
+              // Set input's attributes
+              setInputAttributes(input, currItemBp)
             } else {
               // Other input types
               input = document.createElement('input')
               input.setAttribute('type', currItemBp.type)
             }
 
-            // Process placeholder
-            if (currItemBp.placeholder) {
-              input.setAttribute('placeholder', currItemBp.placeholder)
-            }
-
-            // Process the required attribute
-            if (currItemBp.required) {
-              input.setAttribute('required', '')
-            }
+            // Set input's attributes
+            setInputAttributes(input, currItemBp)
 
             // Process the help message (display upon hover)
             if (currItemBp.help) {
@@ -297,7 +315,7 @@
           }
 
           base.appendChild(div)
-          
+
           // Register elements with priority array
           registerBlueprint(currItemBp)
         }
@@ -316,10 +334,10 @@
     document.title = (blueprint && blueprint.meta && blueprint.meta.title) ? blueprint.meta.title : "Untitled GUI"
     document.querySelector('#gui-title').innerText = document.title
 
-    // Prevent submit button's default behavior
+    // Prevent submit button's default behavior. Define onclick actions.
     document.querySelector('#submitBtn').addEventListener("click", (event) => {
       if (!document.querySelector('#main-form').checkValidity()) {
-        document.querySelector('#main-form').reportValidity();
+        document.querySelector('#main-form').reportValidity()
       } else {
         event.preventDefault()
         toCommand()
@@ -339,9 +357,17 @@
   </script>
 
   <style>
-    html, body { min-height: 100%; }
+    html,
+    body {
+      min-height: 100%;
+    }
 
-    body, div, form, input, select, p {
+    body,
+    div,
+    form,
+    input,
+    select,
+    p {
       padding: 0;
       margin: 0;
       outline: none;
@@ -361,7 +387,9 @@
       color: #007bff;
     }
 
-    .main-form-title { padding: 0 0 0 10px; }
+    .main-form-title {
+      padding: 0 0 0 10px;
+    }
 
     .main-block {
       display: flex;
@@ -392,7 +420,11 @@
       margin-bottom: 10px;
     }
 
-    .fieldset-block>div, input, label { width: 100%; }
+    .fieldset-block>div,
+    input,
+    label {
+      width: 100%;
+    }
 
     label {
       padding: 0 5px;
@@ -405,22 +437,35 @@
       vertical-align: middle;
     }
 
-    .checkbox { margin-bottom: 10px; }
+    .checkbox {
+      margin-bottom: 10px;
+    }
 
-    select, .radioButtons {
+    select,
+    .radioButtons {
       width: calc(100% + 26px);
       padding: 5px 0;
     }
 
-    select { background: transparent; }
+    select {
+      background: transparent;
+    }
 
-    input[type="radio"] { width: auto; }
+    input[type="radio"] {
+      width: auto;
+    }
 
-    .radioButtons[type="radio"] { padding: 0 5px 0 0; }
+    .radioButtons[type="radio"] {
+      padding: 0 5px 0 0;
+    }
 
-    .birthdate select.day { width: 35px; }
+    .birthdate select.day {
+      width: 35px;
+    }
 
-    .birthdate select.mounth { width: calc(100% - 94px); }
+    .birthdate select.mounth {
+      width: calc(100% - 94px);
+    }
 
     .birthdate input {
       width: 38px;
@@ -432,9 +477,13 @@
       margin: -2px 10px 0 0;
     }
 
-    .checkbox a { color: #007bff; }
+    .checkbox a {
+      color: #007bff;
+    }
 
-    .checkbox a:hover { color: #0069CF; }
+    .checkbox a:hover {
+      color: #0069CF;
+    }
 
     button {
       width: 100%;
@@ -448,13 +497,27 @@
       color: #fff;
     }
 
-    button:hover { background: #0069CF; }
+    button:hover {
+      background: #0069CF;
+    }
 
     @media (min-width: 568px) {
-      .fieldset-block>div { width: 50%; }
-      label { width: 40%; }
-      input { width: 60%; }
-      select, .radioButtons { width: calc(60% + 16px); }
+      .fieldset-block>div {
+        width: 50%;
+      }
+
+      label {
+        width: 40%;
+      }
+
+      input {
+        width: 60%;
+      }
+
+      select,
+      .radioButtons {
+        width: calc(60% + 16px);
+      }
     }
   </style>
 </body>

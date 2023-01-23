@@ -58,6 +58,33 @@ const blueprint = {
           },
         },
         {
+          type: "text",
+          label: "Disabled field",
+          help: "Some help message",
+          disabled: true,
+          placeholder: "You can not change the content",
+          default: "Unchangeable content",
+          command: {
+            order: 1,
+            type: "str",
+            arg: "--disabled-field",
+          },
+        },
+        {
+          type: "text",
+          label: "Disabled and ignored field",
+          help: "Some help message",
+          disabled: true,
+          placeholder: "Excluded in the output",
+          default: "Unchangeable content",
+          command: {
+            ignoreOnDisabled: true,
+            order: 1,
+            type: "str",
+            arg: "--disabled-field-2",
+          },
+        },
+        {
           type: "password",
           label: "Password field",
           placeholder: "Password",
