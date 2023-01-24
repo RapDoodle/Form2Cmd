@@ -413,11 +413,22 @@ const blueprint = {
             arg: "--checkbox3",
           },
         },
+        {
+          type: "checkbox",
+          labelHTML: "I agree to <a href=\"https://www.google.com\">Termly's Terms of Use</a> and <a href=\"https://www.google.com\">Privacy Policy</a>.",
+          help: "Agree to the terms.",
+          required: true,
+          command: {
+            order: 255,
+            type: "flag",
+            arg: "--accept-terms",
+          },
+        },
       ],
     },
     {
       type: "fieldset",
-      title: "Advanced Features",
+      titleHTML: "<a href=\"https://www.google.com/\">Advanced Features</a>",
       form: [
         {
           type: "text",
@@ -430,6 +441,17 @@ const blueprint = {
             order: 50,
             type: "str",
             arg: "--af1",
+          },
+        },
+        {
+          type: "checkbox-right",
+          labelHTML: "Use <a href=\"https://www.google.com\">Google</a>",
+          help: "Some help message",
+          required: false,
+          command: {
+            order: 20,
+            type: "flag",
+            arg: "--use-google",
           },
         },
       ],

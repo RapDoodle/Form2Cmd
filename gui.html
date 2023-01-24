@@ -160,6 +160,19 @@
     }
 
     /**
+     * Set the text/html of label
+     * 
+     * @param {object} The label element.
+     */
+    const renderLabel = (label, bp) => {
+      if (bp.labelHTML) {
+        label.innerHTML = bp.labelHTML
+      } else {
+        label.innerText = bp.label ? bp.label : ""
+      }
+    }
+
+    /**
      * Generate form elements and add it to DOM recursively.
      * 
      * @param {object} The container that holds all the form items of the
@@ -178,7 +191,11 @@
           // Create legends
           const legend = document.createElement('legend')
           const h3 = document.createElement('h3')
-          h3.innerText = (currItemBp && currItemBp.title) ? currItemBp.title : ""
+          if (currItemBp.titleHTML) {
+            h3.innerHTML = currItemBp.titleHTML
+          } else {
+            h3.innerText = currItemBp.title ? currItemBp.title : ""
+          }
           legend.appendChild(h3)
           fieldset.appendChild(legend)
 
@@ -197,7 +214,7 @@
           const input = document.createElement('input')
           input.setAttribute('type', 'checkbox')
           const span = document.createElement('span')
-          span.innerText = currItemBp.label
+          renderLabel(span, currItemBp)
           div.appendChild(input)
           div.appendChild(span)
           currItemBp.element = input
@@ -215,7 +232,7 @@
 
           // Create labels
           const label = document.createElement('label')
-          label.innerText = currItemBp.label ? currItemBp.label : ""
+          renderLabel(label, currItemBp)
           div.appendChild(label)
 
           if (currItemBp.type === 'radio') {
