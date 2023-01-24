@@ -456,5 +456,124 @@ const blueprint = {
         },
       ],
     },
+    {
+      type: "fieldset",
+      title: "Togglable Group 1",
+      togglable: true,
+      disabledOnLoad: false,
+      form: [
+        {
+          type: "text",
+          label: "Text field",
+          help: "Some help message",
+          command: {
+            order: 1,
+            type: "str",
+            arg: "--tf1",
+          },
+        },
+        {
+          type: "text",
+          label: "Field with default message",
+          help: "Some help message",
+          required: true,
+          default: "Some default text",
+          command: {
+            order: 1,
+            type: "str",
+            arg: "--tf2",
+          },
+        },
+        {
+          type: "text",
+          label: "Text field",
+          help: "Some help message",
+          disabled: true,
+          placeholder: "The field can't be enabled",
+          command: {
+            order: 1,
+            type: "str",
+            arg: "--tf3",
+          },
+        },
+        {
+          type: "text",
+          label: "Text field",
+          help: "Some help message",
+          disabled: true,
+          enableOnToggle: true,
+          placeholder: "The field can be enabled after toggle",
+          command: {
+            order: 1,
+            type: "str",
+            arg: "--tf3",
+          },
+        },
+      ],
+    },
+    {
+      type: "fieldset",
+      title: "Togglable Group 2",
+      togglable: true,
+      disabledOnLoad: true,
+      form: [
+        {
+          type: "text",
+          label: "Text field",
+          help: "Some help message",
+          command: {
+            order: 1,
+            type: "str",
+            arg: "--tf1",
+          },
+        },
+        {
+          type: "text",
+          label: "Field with default message",
+          help: "Some help message",
+          required: true,
+          default: "Some default text",
+          command: {
+            order: 1,
+            type: "str",
+            arg: "--tf2",
+          },
+        },
+
+      ],
+    },
+    {
+      type: "fieldset",
+      title: "Advanced Group",
+      form: [
+        {
+          type: "checkbox-right",
+          label: "Use field",
+          help: "Some help message",
+          required: false,
+          eventListeners: {
+            click: (evt) => {
+              document.querySelector('#field1').disabled = !evt.target.checked
+            }
+          }
+        },
+        {
+          type: "text",
+          label: "Custom attributes",
+          help: "Some help message",
+          disabled: true,
+          id: "field1",
+          attributes: {
+            "data-username": "myusername"
+          },
+          command: {
+            order: 50,
+            type: "str",
+            arg: "--af1",
+          },
+        },
+        
+      ],
+    },
   ],
 }

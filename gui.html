@@ -16,7 +16,7 @@
       <div class="main-form-block">
       </div>
       <button id="submitBtn" type="submit">Submit</button>
-      <input id="cmdField" type="hidden" style="width:100%;padding:10px 0;margin: 5px auto;" readonly rows="5"></input>
+      <input id="cmdField" type="hidden" style="width:100%;padding:10px 0;margin: 5px auto;" readonly rows="5">
     </form>
   </div>
 
@@ -57,6 +57,11 @@
       priorityArr.forEach((bpArr, pri) => {
         if (bpArr) {
           bpArr.forEach((bp) => {
+            // Skip if the blueprint does not contain instructions for outputing commands
+            if (!bp.command) {
+              return
+            }
+            
             if (bp.type === 'radio') {
               // Iterate through all radio buttons
               bp.elements.forEach((inp, idx) => {
@@ -78,7 +83,7 @@
               if (bp.command && bp.command.ignoreOnDisabled && bp.element.disabled) {
                 return
               }
-              
+
               if (bp.command.type.toLowerCase() === 'str') {
                 // Input with value attributes
                 if (bp.element.value.length > 0) {
@@ -109,7 +114,12 @@
      * 
      * @param {object}: Form item's blueprint
      */
-    const registerBlueprint = (currItemBp) => {
+    const registerBlueprint = (currItemBp, groupId) => {
+      // No need to process any command, skip it
+      if (!currItemBp.command) {
+        return
+      }
+
       // Use a default order of 255
       if (!currItemBp.command.order) {
         currItemBp.command.order = 255
@@ -119,6 +129,9 @@
       if (!priorityArr[currItemBp.command.order]) {
         priorityArr[currItemBp.command.order] = new Array()
       }
+
+      // Set groupId
+      currItemBp.groupId = groupId
 
       // Push the current blueprint to the array in the specified order
       priorityArr[currItemBp.command.order].push(currItemBp)
@@ -151,6 +164,20 @@
         input.setAttribute('disabled', '')
       }
 
+      // id attribute
+      if (bp.id) {
+        input.setAttribute('id', bp.id)
+      }
+
+      // Event listeners
+      if (bp.eventListeners) {
+        for (const event in bp.eventListeners) {
+          input.addEventListener(event, (evt) => {
+            bp.eventListeners[event](evt)
+          })
+        }
+      }
+
       // Custom attributes
       if (bp.attributes) {
         for (const attr in bp.attributes) {
@@ -172,6 +199,40 @@
       }
     }
 
+    const toggleElement = (ele, disabled) => {
+      if (ele.disabled && !disabled) {
+        ele.removeAttribute('disabled')
+      } else if (!ele.disabled && disabled) {
+        ele.setAttribute('disabled', '')
+      }
+    }
+
+    const toggleGroup = (groupId, disabled) => {
+      priorityArr.forEach((bpArr, pri) => {
+        if (bpArr) {
+          bpArr.forEach((bp) => {
+            if (bp.disabled && !bp.enableOnToggle) {
+              return
+            }
+            if (bp.groupId && bp.groupId === groupId) {
+              if (bp.type === 'radio') {
+                bp.elements.forEach((inp, idx) => {
+                  toggleElement(inp, disabled)
+                })
+              } else {
+                toggleElement(bp.element, disabled)
+              }
+            }
+          })
+        }
+      })
+    }
+
+    /**
+     * Gloabl variable. Stores the current groupId
+     */
+    let globalGroupId = 0
+
     /**
      * Generate form elements and add it to DOM recursively.
      * 
@@ -180,10 +241,14 @@
      * @param {object} The blueprint that specifies the current level's 
      *                 form items.
      */
-    const createFormElements = (base, formBlueprint) => {
+    const createFormElements = (base, formBlueprint, meta) => {
+      const currGroupId = globalGroupId++
+      
       for (let i = 0; i < formBlueprint.length; i++) {
         const currItemBp = formBlueprint[i]
         if (currItemBp.type.toLowerCase().startsWith("fieldset")) {
+          const meta = {}
+
           // Fieldset block, recursively generate form items
           const fieldset = document.createElement('fieldset')
           base.appendChild(fieldset)
@@ -196,6 +261,17 @@
           } else {
             h3.innerText = currItemBp.title ? currItemBp.title : ""
           }
+          
+          // Togglable group
+          if (currItemBp.togglable) {
+            const toggleCheckbox = document.createElement('input')
+            toggleCheckbox.setAttribute('type', 'checkbox')
+            toggleCheckbox.setAttribute('style', 'margin-left: 5px;')
+            h3.prepend(toggleCheckbox)
+            meta.toggleCheckbox = toggleCheckbox
+            meta.disabledOnLoad = currItemBp.disabledOnLoad ? currItemBp.disabledOnLoad : false
+          }
+          
           legend.appendChild(h3)
           fieldset.appendChild(legend)
 
@@ -205,7 +281,7 @@
           fieldset.appendChild(fieldsetBlock)
 
           // Recursively generate form items
-          createFormElements(fieldsetBlock, currItemBp.form)
+          createFormElements(fieldsetBlock, currItemBp.form, meta)
 
         } else if (currItemBp.type === 'checkbox' || currItemBp.type === 'checbox-left') {
           // Default checkboxes: checkbox positioned left to the label
@@ -224,7 +300,7 @@
           setInputAttributes(input, currItemBp)
 
           // Register elements with priority array
-          registerBlueprint(currItemBp)
+          registerBlueprint(currItemBp, currGroupId)
 
         } else {
           // Form items with input positioned right to the label
@@ -350,8 +426,19 @@
           base.appendChild(div)
 
           // Register elements with priority array
-          registerBlueprint(currItemBp)
+          registerBlueprint(currItemBp, currGroupId, null)
         }
+      }
+
+      if (meta && meta.toggleCheckbox) {
+        if (meta.disabledOnLoad) {
+          toggleGroup(currGroupId, true)
+        } else {
+          meta.toggleCheckbox.checked = true
+        }
+        meta.toggleCheckbox.addEventListener('click', (event) => {
+          toggleGroup(currGroupId, !event.target.checked)
+        })
       }
     }
 
