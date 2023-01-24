@@ -23,7 +23,7 @@
   <script src="gui.manifest.js"></script>
 
   <script>
-    // Functions
+    // Function definitions
 
     /**
      * Process values. It does the following things:
@@ -130,25 +130,32 @@
      * @param {object} The input element.
      * @param {object} The attributes (blueprint).
      */
-    const setInputAttributes = (input, attributes) => {
+    const setInputAttributes = (input, bp) => {
       // Placeholder attribute
-      if (attributes.placeholder) {
-        input.setAttribute('placeholder', attributes.placeholder)
+      if (bp.placeholder) {
+        input.setAttribute('placeholder', bp.placeholder)
       }
 
       // Required attribute
-      if (attributes.required) {
+      if (bp.required) {
         input.setAttribute('required', '')
       }
 
       // Checked attribute. Only for radio
-      if (attributes.checked) {
+      if (bp.checked) {
         input.setAttribute('checked', '')
       }
 
       // Disabled attribute
-      if (attributes.disabled) {
+      if (bp.disabled) {
         input.setAttribute('disabled', '')
+      }
+
+      // Custom attributes
+      if (bp.attributes) {
+        for (const attr in bp.attributes) {
+          input.setAttribute(attr, bp.attributes[attr])
+        }
       }
     }
 

@@ -1,6 +1,7 @@
 const blueprint = {
   meta: {
     title: "Demo GUI",
+    apiVersion: "0.1.0"
   },
   command: {
     prefix: "executable",
@@ -410,6 +411,25 @@ const blueprint = {
             order: 20,
             type: "flag",
             arg: "--checkbox3",
+          },
+        },
+      ],
+    },
+    {
+      type: "fieldset",
+      title: "Advanced Features",
+      form: [
+        {
+          type: "text",
+          label: "Custom attributes",
+          help: "Some help message",
+          attributes: {
+            "data-username": "myusername"
+          },
+          command: {
+            order: 50,
+            type: "str",
+            arg: "--af1",
           },
         },
       ],
