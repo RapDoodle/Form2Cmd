@@ -461,6 +461,8 @@ const blueprint = {
       title: "Togglable Group 1",
       togglable: true,
       disabledOnLoad: false,
+      collapsible: true,
+      collapsedOnLoad: false,
       form: [
         {
           type: "text",
@@ -516,6 +518,8 @@ const blueprint = {
       title: "Togglable Group 2",
       togglable: true,
       disabledOnLoad: true,
+      collapsible: true,
+      collapsedOnLoad: false,
       form: [
         {
           type: "text",
@@ -545,6 +549,8 @@ const blueprint = {
     {
       type: "fieldset",
       title: "Advanced Group",
+      collapsible: true,
+      collapsedOnLoad: true,
       form: [
         {
           type: "checkbox-right",
@@ -572,7 +578,6 @@ const blueprint = {
             arg: "--af1",
           },
         },
-        
       ],
     },
   ],

@@ -44,7 +44,9 @@ Fieldsets are essentially containers of form elements. Fieldsets can be nested w
 |`title`|Fieldset lengend.|
 |`form`|A list containing the specification of form elements.|
 |`togglable`|Whether the form can be toggled to enable/disable.|
-|`disabledOnLoad`|Whether the fieldset is disabled by default.|
+|`disabledOnLoad`|Whether the fieldset is disabled on load.|
+|`collapsible`|Whether the fieldset can be collapsed.|
+|`collapsedOnLoad`|Whether the fieldset is collapsed on load.|
 
 An example fieldset:
 

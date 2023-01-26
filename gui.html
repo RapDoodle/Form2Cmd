@@ -196,6 +196,10 @@
         label.innerHTML = bp.labelHTML
       } else {
         label.innerText = bp.label ? bp.label : ""
+        // "*" will only be appended if text mode is used
+        if (bp.required) {
+          label.innerText = label.innerText + "*"
+        }
       }
     }
 
@@ -228,6 +232,14 @@
       })
     }
 
+    const toggleFieldsetVisibility = (fieldsetBlock, visible) => {
+      if (fieldsetBlock.classList.contains('hidden') && visible) {
+        fieldsetBlock.classList.remove('hidden')
+      } else if (!fieldsetBlock.classList.contains('hidden') && !visible) {
+        fieldsetBlock.classList.add('hidden')
+      }
+    }
+
     /**
      * Gloabl variable. Stores the current groupId
      */
@@ -244,8 +256,8 @@
     const createFormElements = (base, formBlueprint, meta) => {
       const currGroupId = globalGroupId++
       
-      for (let i = 0; i < formBlueprint.length; i++) {
-        const currItemBp = formBlueprint[i]
+      for (let i = 0; i < formBlueprint.form.length; i++) {
+        const currItemBp = formBlueprint.form[i]
         if (currItemBp.type.toLowerCase().startsWith("fieldset")) {
           const meta = {}
 
@@ -271,22 +283,34 @@
             meta.toggleCheckbox = toggleCheckbox
             meta.disabledOnLoad = currItemBp.disabledOnLoad ? currItemBp.disabledOnLoad : false
           }
+
+          // Collapsible group
+          if (currItemBp.collapsible) {
+            const collapseBtn = document.createElement('a')
+            collapseBtn.innerText = '▲'
+            h3.prepend(collapseBtn)
+            meta.collapseBtn = collapseBtn
+            meta.collapsedOnLoad = currItemBp.collapsedOnLoad ? currItemBp.collapsedOnLoad : false
+          }
           
           legend.appendChild(h3)
           fieldset.appendChild(legend)
 
           // Form item container
           const fieldsetBlock = document.createElement('div')
-          fieldsetBlock.classList = [currItemBp.type + '-block']
+          fieldsetBlock.classList.add(currItemBp.type + '-block')
           fieldset.appendChild(fieldsetBlock)
+          meta.fieldsetBlock = fieldsetBlock
 
           // Recursively generate form items
-          createFormElements(fieldsetBlock, currItemBp.form, meta)
+          if (currItemBp.form) {
+            createFormElements(fieldsetBlock, currItemBp, meta)
+          }
 
         } else if (currItemBp.type === 'checkbox' || currItemBp.type === 'checbox-left') {
           // Default checkboxes: checkbox positioned left to the label
           const div = document.createElement('div')
-          div.classList = ['checkbox']
+          div.classList.add('checkbox')
           const input = document.createElement('input')
           input.setAttribute('type', 'checkbox')
           const span = document.createElement('span')
@@ -315,7 +339,7 @@
             // Form items that need multiple input elements
             // A group of radio buttons
             const radioButtonsDiv = document.createElement('div')
-            radioButtonsDiv.classList = ['radioButtons']
+            radioButtonsDiv.classList.add('radioButtons')
             const inputs = new Array()
 
             const generateRadios = (value, text) => {
@@ -335,7 +359,7 @@
 
               // Create the label
               const currLabel = document.createElement('label')
-              currLabel.classList = ['radio']
+              currLabel.classList.add('radio')
               currLabel.setAttribute('for', value)
               currLabel.innerText = text
 
@@ -430,15 +454,46 @@
         }
       }
 
-      if (meta && meta.toggleCheckbox) {
+      if (meta) {
+        // Toggle
+        if (meta.toggleCheckbox) {
+          // Handle checkbox state changes
+          meta.toggleCheckbox.addEventListener('click', (event) => {
+            toggleGroup(currGroupId, !event.target.checked)
+          })
+
+          // Initialize checkbox initial state
+          if (!meta.disabledOnLoad) {
+            meta.toggleCheckbox.checked = true
+          }
+        }
+
+        // Handle disabledOnLoad: true
         if (meta.disabledOnLoad) {
           toggleGroup(currGroupId, true)
-        } else {
-          meta.toggleCheckbox.checked = true
         }
-        meta.toggleCheckbox.addEventListener('click', (event) => {
-          toggleGroup(currGroupId, !event.target.checked)
-        })
+
+        // Collapse
+        if (meta.collapseBtn) {
+          meta.collapseBtn.addEventListener('click', (evt) => {
+            if (meta.collapseBtn.innerText === '▲') {
+              // Hide
+              toggleFieldsetVisibility(meta.fieldsetBlock, false)
+              meta.collapseBtn.innerText = '▼'
+            } else {
+              // Show
+              toggleFieldsetVisibility(meta.fieldsetBlock, true)
+              meta.collapseBtn.innerText = '▲'
+            }
+            return false
+          })
+
+          if (meta.collapsedOnLoad) {
+            // Hide
+            toggleFieldsetVisibility(meta.fieldsetBlock, false)
+            meta.collapseBtn.innerText = '▼'
+          }
+        }
       }
     }
 
@@ -472,7 +527,7 @@
 
     // Generate form entries recursively
     const formBase = document.querySelector('#main-form>.main-form-block')
-    const formBlueprintBase = blueprint.form
+    const formBlueprintBase = blueprint
     createFormElements(formBase, formBlueprintBase)
   </script>
 
@@ -500,11 +555,17 @@
       margin: 0;
       font-weight: 400;
       color: #007bff;
+      cursor: default;
     }
 
     h3 {
       margin: 12px 0;
       color: #007bff;
+      cursor: default;
+    }
+
+    h3 a {
+      text-decoration: none;
     }
 
     .main-form-title {
@@ -638,6 +699,10 @@
       .radioButtons {
         width: calc(60% + 16px);
       }
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </body>
