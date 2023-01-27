@@ -52,9 +52,9 @@
     const toCommand = () => {
       let command = blueprint.command.prefix
 
-      // Process command conversion in command priority's
+      // Process command conversion in command order's
       // ascending order.
-      priorityArr.forEach((bpArr, pri) => {
+      orderArr.forEach((bpArr, order) => {
         if (bpArr) {
           bpArr.forEach((bp) => {
             // Skip if the blueprint does not contain instructions for outputing commands
@@ -109,7 +109,7 @@
     }
 
     /**
-     * Register blueprint with the priority array. Radix sort is
+     * Register blueprint with the order array. Radix sort is
      * implemented to sort arguments with different priorities.
      * 
      * @param {object}: Form item's blueprint
@@ -126,15 +126,15 @@
       }
 
       // Create an array if the given position is null
-      if (!priorityArr[currItemBp.command.order]) {
-        priorityArr[currItemBp.command.order] = new Array()
+      if (!orderArr[currItemBp.command.order]) {
+        orderArr[currItemBp.command.order] = new Array()
       }
 
       // Set groupId
       currItemBp.groupId = groupId
 
       // Push the current blueprint to the array in the specified order
-      priorityArr[currItemBp.command.order].push(currItemBp)
+      orderArr[currItemBp.command.order].push(currItemBp)
     }
 
     /**
@@ -212,7 +212,7 @@
     }
 
     const toggleGroup = (groupId, disabled) => {
-      priorityArr.forEach((bpArr, pri) => {
+      orderArr.forEach((bpArr) => {
         if (bpArr) {
           bpArr.forEach((bp) => {
             if (bp.disabled && !bp.enableOnToggle) {
@@ -323,7 +323,7 @@
           // Set input's attributes
           setInputAttributes(input, currItemBp)
 
-          // Register elements with priority array
+          // Register elements with order array
           registerBlueprint(currItemBp, currGroupId)
 
         } else {
@@ -456,7 +456,7 @@
 
           base.appendChild(div)
 
-          // Register elements with priority array
+          // Register elements with order array
           registerBlueprint(currItemBp, currGroupId, null)
         }
       }
@@ -508,9 +508,9 @@
 
   <script>
     // Setup script
-    // Priority array. Priority ranges from 0 to 255
-    const priorityArr = new Array()
-    priorityArr.length = 256
+    // Order array. Order ranges from 0 to 255
+    const orderArr = new Array()
+    orderArr.length = 256
 
     // Configure title
     document.title = (blueprint && blueprint.meta && blueprint.meta.title) ? blueprint.meta.title : "Untitled GUI"
