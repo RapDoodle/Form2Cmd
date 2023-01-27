@@ -1,5 +1,7 @@
 # Form2Cmd
 
+## Introduction
+
 Form2Cmd is a declarative programming framework that helps programmers build graphical user interfaces (GUIs) for command-line-only applications. Programmers can use Form2Cmd to build web forms in a declarative manner. Form2Cmd then assists programmers in converting user inputs into the appropriate command for the application.
 
 ### Feature highlights
@@ -111,7 +113,7 @@ Note: By default, `fieldset`s are double-columned. If you wish a single-columned
 
 #### Form inputs
 
-With Form2Cmd, you can build forms in a declarative manner. Supported input types include `text`, `email`, `password`, `date`, `email`, `number`, `tel`, `url`, `range`, `radio`, `checkbox`, and `checkbox-right`. 
+With Form2Cmd, you can build forms in a declarative manner. Supported input types include `text`, `email`, `password`, `date`, `email`, `number`, `tel`, `url`, `range`, `radioGroup`, `checkbox`, and `checkbox-right`. 
 
 The attributes that can be specified are summarized in the following table.
 
@@ -123,11 +125,11 @@ The attributes that can be specified are summarized in the following table.
 |`disabled`|Whether the input element is disabled.|
 |`placeholder`|The input's placeholder.|
 |`default`|The default text/choice/option.|
-|`options`|Only required when the input type is `select` or `radio`. Can be a list of strings or objects containing `value` and `text` attributes.|
+|`options`|Only required when the input type is `select` or `radioGroup`. Can be a list of strings or objects containing `value` and `text` attributes.|
 |`attributes`|An object containing the key and value of attributes that are not natively supported by Form2Cmd.|
 |`command`|The rule of converting the current form input into commands.|
 |`id`|The input's id (except radios and checkboxes). Only needed when you need to perform custom DOM operations.|
-|`ids`|The radios and checkboxes' id. Only needed when you need to perform custom DOM operations.|
+|`ids`|The radios and select's id. Only needed when you need to perform custom DOM operations.|
 
 ## Update
 

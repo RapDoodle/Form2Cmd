@@ -53,7 +53,7 @@
       let command = blueprint.command.prefix
 
       // Process command conversion in command priority's
-      // ascending order
+      // ascending order.
       priorityArr.forEach((bpArr, pri) => {
         if (bpArr) {
           bpArr.forEach((bp) => {
@@ -62,7 +62,7 @@
               return
             }
             
-            if (bp.type === 'radio') {
+            if (bp.type === 'radioGroup') {
               // Iterate through all radio buttons
               bp.elements.forEach((inp, idx) => {
                 if (inp.checked) {
@@ -219,7 +219,7 @@
               return
             }
             if (bp.groupId && bp.groupId === groupId) {
-              if (bp.type === 'radio') {
+              if (bp.type === 'radioGroup') {
                 bp.elements.forEach((inp, idx) => {
                   toggleElement(inp, disabled)
                 })
@@ -335,7 +335,7 @@
           renderLabel(label, currItemBp)
           div.appendChild(label)
 
-          if (currItemBp.type === 'radio') {
+          if (currItemBp.type === 'radioGroup') {
             // Form items that need multiple input elements
             // A group of radio buttons
             const radioButtonsDiv = document.createElement('div')
@@ -377,6 +377,13 @@
                 generateRadios(obj.value, obj.text)
               }
             })
+
+            // Set the id for each bp.elements
+            if (currItemBp.ids) {
+              inputs.forEach((ele, idx) => {
+                ele.setAttribute('id', currItemBp.ids[idx])
+              })
+            }
 
             div.appendChild(radioButtonsDiv)
             currItemBp.elements = inputs

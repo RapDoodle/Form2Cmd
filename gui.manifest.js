@@ -232,10 +232,11 @@ const blueprint = {
       title: "Radios",
       form: [
         {
-          type: "radio",
+          type: "radioGroup",
           label: "Radio field",
           help: "Choose an option",
           options: ["Option 1", "Option 2", "Option 3"],
+          ids: ['radio_opt_1', 'radio_opt_2', 'radio_opt_3'],
           command: {
             order: 15,
             type: "str",
@@ -243,7 +244,7 @@ const blueprint = {
           },
         },
         {
-          type: "radio",
+          type: "radioGroup",
           label: "Radio with default value",
           help: "Choose an option",
           options: ["Option 1", "Option 2", "Option 3"],
@@ -255,7 +256,7 @@ const blueprint = {
           },
         },
         {
-          type: "radio",
+          type: "radioGroup",
           label: "Required radio field",
           help: "Choose an option",
           required: true,
@@ -267,7 +268,7 @@ const blueprint = {
           },
         },
         {
-          type: "radio",
+          type: "radioGroup",
           label: "Radio field with different value/text pair",
           help: "Choose an option",
           required: true,
@@ -293,7 +294,7 @@ const blueprint = {
           },
         },
         {
-          type: "radio",
+          type: "radioGroup",
           label: "Radio field (flags)",
           help: "Choose an option",
           required: true,
@@ -305,7 +306,7 @@ const blueprint = {
           },
         },
         {
-          type: "radio",
+          type: "radioGroup",
           label: "Disabled radios",
           help: "Choose an option",
           required: true,
@@ -319,7 +320,7 @@ const blueprint = {
           },
         },
         {
-          type: "radio",
+          type: "radioGroup",
           label: "Disabled radios (ignored)",
           help: "Choose an option",
           required: true,
