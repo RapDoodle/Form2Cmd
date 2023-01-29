@@ -2,7 +2,11 @@
 
 ## Introduction
 
-Form2Cmd is a declarative programming framework that helps programmers build graphical user interfaces (GUIs) for command-line-only applications. Programmers can use Form2Cmd to build web forms in a declarative manner. Form2Cmd then assists programmers in converting user inputs into the appropriate command for the application.
+Form2Cmd is a declarative programming framework that helps programmers build graphical user interfaces (GUIs) for command-line-only applications. Programmers can use Form2Cmd to build web forms in a declarative manner. Form2Cmd then converts user inputs into the appropriate command for the command-line application.
+
+### Demo
+
+[Generate cURL command for HTTP requests]() converts form input into the appropriate command for the command line tool [cURL](https://curl.se/).
 
 ### Feature highlights
 
@@ -12,13 +16,13 @@ Form2Cmd is a declarative programming framework that helps programmers build gra
 
 ## Getting Started
 
-1. Cloen the project
+1. Clone the project
 
     ```bash
     git clone https://github.com/RapDoodle/Form2Cmd.git
     ```
 
-1. Copy `gui.html` and `gui.manifest.js` into an appropriate location in your project.
+1. Copy `gui.html` and `gui.manifest.js` into an appropriate location in your project. `gui.html` can be renamed to any filename you like.
 
 1. (Optional) Add the following content to `.gitattributes` to avoid Form2Cmd messing up with GitHub's programming language statistics counting.
 
@@ -29,6 +33,8 @@ Form2Cmd is a declarative programming framework that helps programmers build gra
     ```
 
 1. Edit the configuration file `gui.manifest.js` according to your needs. The configuration file already contains most of the scenarios you may encounter.
+
+1. Let users run Form2Cmd in their browser, or deploy it to your server. 
 
 ## Configuration
 
@@ -54,13 +60,14 @@ meta: {
 
 ### Command
 
-The blueprint's command field contains basic information about the command.
+The blueprint's command field contains information about the command.
 
 |Attribute|Description|
 |-|-|
 |`prefix`|The prefix of the output command. Usually contains the name of the program. For example, `curl`|
 |`suffix`|Usually not used. Can be used to specify the additional text that will be appended at the end of the output command.|
 |`separator`|The separator used. By default, it is an empty space. Other options include `=`.|
+|`hooks`|Custom hooks that will be triggered in command/hook's order. Can be used to add custom logics into command generation.|
 
 An example of the command field
 
